@@ -83,10 +83,21 @@ router.put("/:id/like",async (req,res) => {
     }
 })
 
-// タイムラインの投稿を取得する
-router.get("/timeline/all", async (req,res) => {
+// プロフィールのタイムラインの投稿を取得する
+router.get("/profile/:username", async (req,res) => {
     try {
-        const currentUser = await User.findById(req.body.userId);
+        const user = await User.findOne({username: req.params.username});
+        const userPosts = await Post.find({ userId: user._id });
+        return res.status(200).json(userPosts);
+    } catch (err) {
+        return res.status(500).json(err);
+    }
+});
+
+// ホームのタイムラインの投稿を取得する
+router.get("/timeline/:userId", async (req,res) => {
+    try {
+        const currentUser = await User.findById(req.params.userId);
         const userPosts = await Post.find({ userId: currentUser._id });
         // 自分がフォローしている人の投稿すべて
         const friendPosts = await Promise.all(
